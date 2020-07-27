@@ -69,6 +69,7 @@ struct KdTree
 		std::vector<int> ids;
 		std::cout << "target: " << target[0] << "," << target[1] << " distTol: " << distanceTol << std::endl;
 		searchHelper(target, root, distanceTol, 0, ids);
+		std::cout << "neighbor points size: " << ids.size() << std::endl;
 		return ids;
 	}
 	

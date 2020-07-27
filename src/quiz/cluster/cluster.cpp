@@ -5,6 +5,7 @@
 #include "../../render/box.h"
 #include <chrono>
 #include <string>
+#include <unordered_set>
 #include "kdtree.h"
 
 // Arguments:
@@ -75,12 +76,34 @@ void render2DTree(Node* node, pcl::visualization::PCLVisualizer::Ptr& viewer, Bo
 
 }
 
+void findNearPoints(const std::vector<std::vector<float>>& points, int id, KdTree* tree, float distanceTol, std::unordered_set<int>& visited, std::vector<int>& cluster) {
+    visited.insert(id);
+    cluster.push_back(id);
+    std::vector<int> nearby = tree->search(points[id], distanceTol);
+    for (auto index : nearby) {
+        if (visited.find(index) == visited.end()) {
+            findNearPoints(points, index, tree, distanceTol, visited, cluster);
+        }
+    }
+
+}
+
 std::vector<std::vector<int>> euclideanCluster(const std::vector<std::vector<float>>& points, KdTree* tree, float distanceTol)
 {
 
 	// TODO: Fill out this function to return list of indices for each cluster
 
 	std::vector<std::vector<int>> clusters;
+
+    std::unordered_set<int> visited; 
+    for (size_t index = 0; index < points.size(); ++index) {
+        if (visited.find(index) != visited.end()) 
+            continue;
+        std::vector<int> cluster;
+        findNearPoints(points, index, tree, distanceTol, visited, cluster);
+        if (!cluster.empty())
+            clusters.push_back(cluster);
+    }
  
 	return clusters;
 
