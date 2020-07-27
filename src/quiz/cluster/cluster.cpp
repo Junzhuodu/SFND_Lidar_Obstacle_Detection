@@ -107,43 +107,44 @@ int main ()
 	KdTree* tree = new KdTree;
   
     for (int i=0; i<points.size(); i++) 
-    	tree->insert(points[i],i); 
+        tree->insert(points[i],i); 
 
-  	int it = 0;
-  	render2DTree(tree->root,viewer,window, it);
-  
-  	std::cout << "Test Search" << std::endl;
-  	std::vector<int> nearby = tree->search({-6,7},3.0);
-  	for(int index : nearby)
-      std::cout << index << ",";
-  	std::cout << std::endl;
+	int it = 0;
+	render2DTree(tree->root,viewer,window, it);
 
-  	// Time segmentation process
-  	auto startTime = std::chrono::steady_clock::now();
-  	//
-  	std::vector<std::vector<int>> clusters = euclideanCluster(points, tree, 3.0);
-  	//
-  	auto endTime = std::chrono::steady_clock::now();
-  	auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
-  	std::cout << "clustering found " << clusters.size() << " and took " << elapsedTime.count() << " milliseconds" << std::endl;
+	std::cout << "Test Search" << std::endl;
+	std::vector<int> nearby = tree->search({-6,7},3.0);
+	for(int index : nearby) {
+        std::cout << "index: " << index << ": " << points[index][0] << "," << points[index][1] << std::endl;;
+    }
+	std::cout << std::endl;
 
-  	// Render clusters
-  	int clusterId = 0;
-	std::vector<Color> colors = {Color(1,0,0), Color(0,1,0), Color(0,0,1)};
-  	for(std::vector<int> cluster : clusters)
-  	{
-  		pcl::PointCloud<pcl::PointXYZ>::Ptr clusterCloud(new pcl::PointCloud<pcl::PointXYZ>());
-  		for(int indice: cluster)
-  			clusterCloud->points.push_back(pcl::PointXYZ(points[indice][0],points[indice][1],0));
-  		renderPointCloud(viewer, clusterCloud,"cluster"+std::to_string(clusterId),colors[clusterId%3]);
-  		++clusterId;
-  	}
-  	if(clusters.size()==0)
-  		renderPointCloud(viewer,cloud,"data");
-	
-  	while (!viewer->wasStopped ())
-  	{
-  	  viewer->spinOnce ();
-  	}
+	// Time segmentation process
+	auto startTime = std::chrono::steady_clock::now();
+	//
+	std::vector<std::vector<int>> clusters = euclideanCluster(points, tree, 3.0);
+	//
+	auto endTime = std::chrono::steady_clock::now();
+	auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
+	std::cout << "clustering found " << clusters.size() << " and took " << elapsedTime.count() << " milliseconds" << std::endl;
+
+	// Render clusters
+	int clusterId = 0;
+    std::vector<Color> colors = {Color(1,0,0), Color(0,1,0), Color(0,0,1)};
+	for(std::vector<int> cluster : clusters)
+	{
+		pcl::PointCloud<pcl::PointXYZ>::Ptr clusterCloud(new pcl::PointCloud<pcl::PointXYZ>());
+		for(int indice: cluster)
+			clusterCloud->points.push_back(pcl::PointXYZ(points[indice][0],points[indice][1],0));
+		renderPointCloud(viewer, clusterCloud,"cluster"+std::to_string(clusterId),colors[clusterId%3]);
+		++clusterId;
+	}
+	if(clusters.size()==0)
+		renderPointCloud(viewer,cloud,"data");
+
+	while (!viewer->wasStopped ())
+	{
+	  viewer->spinOnce ();
+	}
   	
 }
